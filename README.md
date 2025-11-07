@@ -39,11 +39,14 @@ To stand a chance, you must rely on your trusty rifle, your swiftness, but most 
 ### Mission objective
  * Survive for one minute to win
 
-### How to install
- * Compile for Apple Silicon with Homebrew SDL2: `clang -v tommy.c -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -o tommy`
- * Compile for Linux: `todo`
- * Compile for Windows: `todo`
- * Run with `./tommy`
+### How to run
+* Download latest release (todo)
+* Run the executable
+
+### How to compile
+*  [Windows](doc/compile_win.md)
+*  [Apple](doc/compile_apple.md)
+*  [Linux](doc/compile_linux.md)
 
 ### Note
  * The development of this game has benefitted from the use of generative artificial intelligence.
