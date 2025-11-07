@@ -813,7 +813,7 @@ int main(int argc, char **argv) {
     }
 
     SDL_Window *win = SDL_CreateWindow(
-        "The Lost Tommy - survive 1 minute to escape",
+        "The Lost Tommy - survive for one minute to win",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         SCREEN_W, SCREEN_H,
         SDL_WINDOW_SHOWN
