@@ -21,6 +21,10 @@ You are a British solder (a 'Tommy') that must stay alive for one minute to win.
 Your many enemies are ruthless and have even deployed barbed wire.
 To stand a chance, you must rely on your trusty rifle, your swiftness, but most of all, your wits.
 
+### How to play
+* Download [latest release](https://github.com/joerivandervelde/the-lost-tommy/releases) for your operating system
+* Extract contents and run `tommy`
+
 ### Game controls
  * Movement (in 8 directions): `W` `A` `S` `D`
  * Fire (in 8 directions): `I` `J` `K` `L`
@@ -39,14 +43,10 @@ To stand a chance, you must rely on your trusty rifle, your swiftness, but most 
 ### Mission objective
  * Survive for one minute to win
 
-### How to run
-* Download latest release (todo)
-* Run the executable
-
 ### How to compile
-*  [Windows](doc/compile_win.md)
-*  [Apple](doc/compile_apple.md)
-*  [Linux](doc/compile_linux.md)
+ * [Windows 64-bit](doc/compile_win.md)
+ * [Linux 64-bit](doc/compile_linux.md)
+ * [Apple silicon](doc/compile_apple.md)
 
 ### Note
  * The development of this game has benefitted from the use of generative artificial intelligence.

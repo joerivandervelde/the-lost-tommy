@@ -1,4 +1,4 @@
-### Steps to compile on Apple silicon
+### Steps to compile on Apple silicon (ARM64)
 
 Create a new folder and cd into
 ```

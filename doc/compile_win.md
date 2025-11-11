@@ -1,6 +1,6 @@
-### Steps to compile on MS Windows using PowerShell
+### Steps to compile on Microsoft Windows x86_64
 
-Create a new folder and cd into
+Use PowerShell. Create a new folder and cd into
 ```
 mkdir ~/tommy
 cd ~/tommy

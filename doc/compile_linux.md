@@ -1,4 +1,4 @@
-### Steps to compile on Linux
+### Steps to compile on Linux x86_64
 
 Create a new folder and cd into
 ```
