@@ -85,7 +85,7 @@ static bool game_over = false;
 static bool game_won = false;
 static bool paused = false;
 static bool running = true;
-static int enemy_spawn_timer = 0;
+static float enemy_spawn_timer = 0.0f;
 static uint64_t prev = 0;
 static double freq = 0;
 
@@ -210,6 +210,7 @@ static void reset_game(void) {
     generate_props();
 
     survival_time = 0.0f;
+    enemy_spawn_timer = 0.0f;
     game_over = false;
     game_won = false;
     paused = false;
@@ -852,11 +853,11 @@ static void update_game(void *arg) {
         handle_props_effects();
         handle_bullet_actor_collisions();
 
-        // spawn enemies
-        enemy_spawn_timer -= 1;
-        if (enemy_spawn_timer <= 0) {
+        // spawn enemies every 1.0 second
+        enemy_spawn_timer -= (float)dt;
+        if (enemy_spawn_timer <= 0.0f) {
             spawn_enemy();
-            enemy_spawn_timer = 60;
+            enemy_spawn_timer = 1.0f;
         }
 
         // survival timer
