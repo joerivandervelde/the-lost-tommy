@@ -845,6 +845,10 @@ int main(int argc, char **argv) {
 
     while (running) {
         // input / quit / restart
+
+        // start counting how long it takes to render 1 frame
+        uint64_t frame_start = SDL_GetPerformanceCounter();
+
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
         	if (ev.type == SDL_QUIT) running = false;
@@ -870,6 +874,11 @@ int main(int argc, char **argv) {
         uint64_t now = SDL_GetPerformanceCounter();
         double dt = (now - prev) / freq;
         prev = now;
+
+        // delta frame time clamp
+        // if a frame for some reason takes >200ms, set to 200ms to prevent
+        // frame time explosions and unstable physics causing glitches,
+        // overshooting, teleporting, missed collisions, etc
         if (dt > 0.05) dt = 0.05;
 
         if (player.alive && !paused) {
@@ -898,6 +907,16 @@ int main(int argc, char **argv) {
         }
 
         render(ren);
+
+        // add delay to limit frames to exactly 60 fps (or less..)
+        uint64_t frame_end = SDL_GetPerformanceCounter();
+        uint64_t frame_ticks = frame_end - frame_start;
+        uint64_t target_ticks = SDL_GetPerformanceFrequency() / 60;
+
+        if (frame_ticks < target_ticks) {
+            uint32_t delay_ms = (uint32_t)((target_ticks - frame_ticks) * 1000 / SDL_GetPerformanceFrequency());
+            SDL_Delay(delay_ms);
+        }
     }
 
     SDL_DestroyRenderer(ren);
