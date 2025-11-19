@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 /**
  * Constants
@@ -81,6 +84,10 @@ static float survival_time = 0.0f;
 static bool game_over = false;
 static bool game_won = false;
 static bool paused = false;
+static bool running = true;
+static int enemy_spawn_timer = 0;
+static uint64_t prev = 0;
+static double freq = 0;
 
 /**
  * Helper functions
@@ -800,6 +807,84 @@ static void render(SDL_Renderer *ren) {
     SDL_RenderPresent(ren);
 }
 
+static void update_game(void *arg) {
+    SDL_Renderer *ren = (SDL_Renderer *)arg;
+
+    // start counting how long it takes to render 1 frame
+    uint64_t frame_start = SDL_GetPerformanceCounter();
+
+    SDL_Event ev;
+    while (SDL_PollEvent(&ev)) {
+        if (ev.type == SDL_QUIT) running = false;
+        if (ev.type == SDL_KEYDOWN) {
+            if (ev.key.keysym.sym == SDLK_ESCAPE) {
+                running = false;
+            }
+            else if (ev.key.keysym.sym == SDLK_SPACE) {
+                if (!player.alive) {
+                    // when game over, SPACE restarts
+                    reset_game();
+                } else {
+                    // when alive, SPACE pauses
+                    paused = !paused;
+                }
+            }
+        }
+    }
+
+    const Uint8 *keys = SDL_GetKeyboardState(NULL);
+
+    // timing
+    uint64_t now = SDL_GetPerformanceCounter();
+    double dt = (now - prev) / freq;
+    prev = now;
+
+    // delta frame time clamp
+    // if a frame for some reason takes >200ms, set to 200ms to prevent
+    // frame time explosions and unstable physics causing glitches,
+    // overshooting, teleporting, missed collisions, etc
+    if (dt > 0.05) dt = 0.05;
+
+    if (player.alive && !paused) {
+        control_player((float)dt, keys);
+        move_bullets((float)dt);
+        move_enemies((float)dt);
+        handle_props_effects();
+        handle_bullet_actor_collisions();
+
+        // spawn enemies
+        enemy_spawn_timer -= 1;
+        if (enemy_spawn_timer <= 0) {
+            spawn_enemy();
+            enemy_spawn_timer = 60;
+        }
+
+        // survival timer
+        survival_time += (float)dt;
+        if (!game_won && survival_time >= WIN_TIME) {
+            survival_time = WIN_TIME; // clamp
+            game_won = true;
+            player.alive = false; // end the round
+       }
+    } else if (!player.alive) {
+        game_over = true;
+    }
+
+    render(ren);
+
+    // add delay to limit frames to exactly 60 fps (or less..)
+    #ifndef __EMSCRIPTEN__
+    uint64_t frame_end = SDL_GetPerformanceCounter();
+    uint64_t frame_ticks = frame_end - frame_start;
+    uint64_t target_ticks = SDL_GetPerformanceFrequency() / 60;
+
+    if (frame_ticks < target_ticks) {
+        uint32_t delay_ms = (uint32_t)((target_ticks - frame_ticks) * 1000 / SDL_GetPerformanceFrequency());
+        SDL_Delay(delay_ms);
+    }
+    #endif
+}
+
 /**
  * Main game loop
  */
@@ -837,87 +922,19 @@ int main(int argc, char **argv) {
 
     reset_game();
 
-    uint64_t prev = SDL_GetPerformanceCounter();
-    double freq = (double)SDL_GetPerformanceFrequency();
+    prev = SDL_GetPerformanceCounter();
+    freq = (double)SDL_GetPerformanceFrequency();
 
-    int enemy_spawn_timer = 0;
-    bool running = true;
 
-    while (running) {
-        // input / quit / restart
 
-        // start counting how long it takes to render 1 frame
-        uint64_t frame_start = SDL_GetPerformanceCounter();
-
-        SDL_Event ev;
-        while (SDL_PollEvent(&ev)) {
-        	if (ev.type == SDL_QUIT) running = false;
-			if (ev.type == SDL_KEYDOWN) {
-			    if (ev.key.keysym.sym == SDLK_ESCAPE) {
-			        running = false;
-			    }
-			    else if (ev.key.keysym.sym == SDLK_SPACE) {
-			        if (!player.alive) {
-			            // when game over, SPACE restarts
-			            reset_game();
-			        } else {
-			            // when alive, SPACE pauses
-			            paused = !paused;
-			        }
-			    }
-			}
+    #ifdef __EMSCRIPTEN__
+        emscripten_set_main_loop_arg(update_game, ren, 0, 1);
+    #else
+        while (running) {
+            update_game(ren);
         }
+    #endif
 
-        const Uint8 *keys = SDL_GetKeyboardState(NULL);
-
-        // timing
-        uint64_t now = SDL_GetPerformanceCounter();
-        double dt = (now - prev) / freq;
-        prev = now;
-
-        // delta frame time clamp
-        // if a frame for some reason takes >200ms, set to 200ms to prevent
-        // frame time explosions and unstable physics causing glitches,
-        // overshooting, teleporting, missed collisions, etc
-        if (dt > 0.05) dt = 0.05;
-
-        if (player.alive && !paused) {
-            control_player((float)dt, keys);
-            move_bullets((float)dt);
-            move_enemies((float)dt);
-            handle_props_effects();
-            handle_bullet_actor_collisions();
-
-            // spawn enemies
-            enemy_spawn_timer -= 1;
-            if (enemy_spawn_timer <= 0) {
-                spawn_enemy();
-                enemy_spawn_timer = 60;
-            }
-
-            // survival timer
-            survival_time += (float)dt;
-            if (!game_won && survival_time >= WIN_TIME) {
-            	survival_time = WIN_TIME; // clamp
-				game_won = true;
-				player.alive = false; // end the round
-           }
-        } else if (!player.alive) {
-            game_over = true;
-        }
-
-        render(ren);
-
-        // add delay to limit frames to exactly 60 fps (or less..)
-        uint64_t frame_end = SDL_GetPerformanceCounter();
-        uint64_t frame_ticks = frame_end - frame_start;
-        uint64_t target_ticks = SDL_GetPerformanceFrequency() / 60;
-
-        if (frame_ticks < target_ticks) {
-            uint32_t delay_ms = (uint32_t)((target_ticks - frame_ticks) * 1000 / SDL_GetPerformanceFrequency());
-            SDL_Delay(delay_ms);
-        }
-    }
 
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
