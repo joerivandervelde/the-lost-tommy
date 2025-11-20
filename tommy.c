@@ -24,9 +24,9 @@
 #define MAX_BULLETS                256
 #define MAX_ENEMIES                 64
 #define MAX_PROPS                  256
-#define PLAYER_COOLDOWN_FRAMES      20
-#define ENEMY_FIRE_COOLDOWN_FRAMES  90
 #define MAX_BACKGROUND_DOTS       5000
+#define PLAYER_SHOOT_COOLDOWN_SEC 0.4f
+#define ENEMY_FIRE_COOLDOWN_SEC   1.5f
 
 /**
  * Structs
@@ -54,14 +54,14 @@ typedef struct {
     float x, y;
     float vx, vy;
     bool alive;
-    int  death_timer;
-    int  fire_cooldown;
+    int death_timer;
+    float fire_cooldown;
 } Enemy;
 
 typedef struct {
     float x, y;
     float aimx, aimy;
-    int shoot_cooldown;
+    float shoot_cooldown;
     bool alive;
 } Player;
 
@@ -194,7 +194,7 @@ static void reset_game(void) {
     player.y = SCREEN_H/2.0f;
     player.aimx = 0.0f;
     player.aimy = -1.0f;
-    player.shoot_cooldown = 0;
+    player.shoot_cooldown = 0.0f;
     player.alive = true;
 
     for (int i=0;i<MAX_BULLETS;i++) {
@@ -203,7 +203,7 @@ static void reset_game(void) {
     for (int i=0;i<MAX_ENEMIES;i++) {
         enemies[i].alive = false;
         enemies[i].death_timer = 0;
-        enemies[i].fire_cooldown = ENEMY_FIRE_COOLDOWN_FRAMES;
+        enemies[i].fire_cooldown = ENEMY_FIRE_COOLDOWN_SEC;
     }
 
     generate_dots();
@@ -240,7 +240,7 @@ static void spawn_bullet(float x, float y, float dx, float dy,
  */
 static void try_player_fire(void) {
     if (!player.alive) return;
-    if (player.shoot_cooldown > 0) return;
+    if (player.shoot_cooldown > 0.0f) return;
 
     float dx = player.aimx;
     float dy = player.aimy;
@@ -249,7 +249,7 @@ static void try_player_fire(void) {
     }
 
     spawn_bullet(player.x, player.y, dx, dy, BULLET_SPEED, false);
-    player.shoot_cooldown = PLAYER_COOLDOWN_FRAMES;
+    player.shoot_cooldown = PLAYER_SHOOT_COOLDOWN_SEC;
 }
 
 /**
@@ -257,7 +257,7 @@ static void try_player_fire(void) {
  */
 static void enemy_try_fire(Enemy *e) {
     if (!e->alive) return;
-    if (e->fire_cooldown > 0) return;
+    if (e->fire_cooldown > 0.0f) return;
     if (!player.alive) return;
 
     float dx = player.x - e->x;
@@ -268,7 +268,7 @@ static void enemy_try_fire(Enemy *e) {
     }
 
     spawn_bullet(e->x, e->y, dx, dy, ENEMY_BULLET_SPEED, true);
-    e->fire_cooldown = ENEMY_FIRE_COOLDOWN_FRAMES;
+    e->fire_cooldown = ENEMY_FIRE_COOLDOWN_SEC;
 }
 
 /**
@@ -303,7 +303,7 @@ static void spawn_enemy(void) {
     enemies[idx].y = y;
     enemies[idx].alive = true;
     enemies[idx].death_timer = 0;
-    enemies[idx].fire_cooldown = ENEMY_FIRE_COOLDOWN_FRAMES;
+    enemies[idx].fire_cooldown = ENEMY_FIRE_COOLDOWN_SEC;
 }
 
 /**
@@ -350,8 +350,9 @@ static void control_player(float dt, const Uint8 *keys) {
         try_player_fire();
     }
 
-    if (player.shoot_cooldown > 0) {
-        player.shoot_cooldown--;
+    if (player.shoot_cooldown > 0.0f) {
+        player.shoot_cooldown -= dt;
+        if (player.shoot_cooldown < 0.0f) player.shoot_cooldown = 0.0f;
     }
 }
 
@@ -391,8 +392,8 @@ static void move_enemies(float dt) {
             e->y += e->vy * dt;
 
             // try to shoot
-            e->fire_cooldown--;
-            if (e->fire_cooldown < 0) e->fire_cooldown = 0;
+            e->fire_cooldown -= dt;
+            if (e->fire_cooldown < 0.0f) e->fire_cooldown = 0.0f;
             enemy_try_fire(e);
 
             // bayonet melee kill the player
