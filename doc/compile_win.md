@@ -1,12 +1,14 @@
 ### Steps to compile on Microsoft Windows x86_64
 
-Use PowerShell. Create a new folder and cd into
+These instructions work for Microsoft Windows 11 PowerShell.
+
+Create a new folder and step into.
 ```
 mkdir ~/tommy
 cd ~/tommy
 ```
 
-Download game source code
+Download game source code.
 ```
 wget https://raw.githubusercontent.com/joerivandervelde/the-lost-tommy/refs/heads/main/tommy.c -O tommy.c
 ```
@@ -19,29 +21,28 @@ wget https://unlimited.dl.sourceforge.net/project/gcc-win64/15.2.0/gcc-15.2.0-gd
 & "${env:ProgramFiles}\7-Zip\7z.exe" x gcc.7z -ogcc -y
 ```
 
-Download and extract SDL2
+Download and extract SDL2.
 ```
 wget https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-devel-2.32.10-mingw.tar.gz -O sdl.tar.gz
 tar xzfv sdl.tar.gz
 ```
 
-Compile
+Compile game from source.
 ```
 .\gcc\bin\gcc.exe tommy.c -I SDL2-2.32.10\x86_64-w64-mingw32\include -L SDL2-2.32.10\x86_64-w64-mingw32\lib -lmingw32 -lSDL2main -lSDL2 -mwindows -o tommy.exe
 ```
 
-Add DLL, must be in same folder as executable
+Add DLL, must be in same folder as executable.
 ```
 cp .\SDL2-2.32.10\x86_64-w64-mingw32\bin\SDL2.dll .
 ```
 
-All done. Run by double click or from commandline:
+Run game by double-clicking or from commandline.
 ```
 .\tommy.exe
 ```
 
-Cleanup (optional)
+Package for distribution.
 ```
-rm *.7z
-rm *.tar.gz
+Compress-Archive -Path "tommy.exe", "SDL2.dll" -DestinationPath "tommy_windows_x86_64.zip"
 ```

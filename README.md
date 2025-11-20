@@ -47,6 +47,7 @@ To stand a chance, you must rely on your trusty rifle, your swiftness, but most 
  * [Windows 64-bit](doc/compile_win.md)
  * [Linux 64-bit](doc/compile_linux.md)
  * [Apple silicon](doc/compile_apple.md)
+ * [WebAssembly](doc/compile_web.md)
 
 ### Notes
  * This game uses SDL (Simple DirectMedia Layer) under the terms of the zlib license.

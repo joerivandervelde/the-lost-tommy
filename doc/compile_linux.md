@@ -1,46 +1,78 @@
 ### Steps to compile on Linux x86_64
 
-Create a new folder and cd into
+These instructions work for the Ubuntu 24.04 LTS terminal. Adjust for your Linux distro accordingly.
+
+Create a new folder and step into.
 ```
 mkdir ~/tommy
 cd ~/tommy
 ```
 
-Download game source code
+Download game source code.
 ```
 wget https://raw.githubusercontent.com/joerivandervelde/the-lost-tommy/refs/heads/main/tommy.c -O tommy.c
 ```
 
-Install SLD2
+Install gcc, git and make.
 ```
-wget https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz -O sdl.tar.gz
-tar xzfv sdl.tar.gz
-cd SDL2-2.32.10
-./configure # try configure, if this fails, see below
-make -j4 # increase to use more cores
-cd ~/tommy # step out
-mv SDL2-2.32.10/include/ SDL2-2.32.10/SDL2 # rename folder to match source code path
+sudo apt install gcc
+sudo apt install git
+sudo apt install make
 ```
 
-If you have problem building SDL2 like `*** Missing Xext.h, maybe you need to install the libxext-dev package?` missing dependencies must be added, e.g.
+Install x11 and wayland dev packages for their headers. Without these, SDL2 will compile for offscreen rendering only.
 ```
-# still inside the SDL2-2.32.10 folder
-apt download libxext-dev #-> depending on linux distro, might also be yum download libXext-devel
-dpkg -x libxext-dev_*.deb . #-> depending on linux distro, might also be rpm2cpio libXext-devel-1.3.4-8.el9.x86_64.rpm | cpio -idmv
-./configure CPPFLAGS="-Iusr/include" LDFLAGS="-Lusr/lib64" # try configure including libxext
-```
-
-Compile
-```
-gcc tommy.c -ISDL2-2.32.10 -LSDL2-2.32.10/build/.libs -lSDL2 -lm -Wl,-rpath,"." -o tommy
-```
-
-Add shared library, must be in same folder as executable (via rpath)
-```
-cp SDL2-2.32.10/build/.libs/libSDL2-2.0.so.0 .
+sudo apt install \
+build-essential \
+libx11-dev libxext-dev libxrandr-dev libxrender-dev libxfixes-dev \
+libxinerama-dev libxcursor-dev libxi-dev \
+libxkbcommon-dev libxkbcommon-x11-dev \
+libwayland-dev wayland-protocols \
+libdrm-dev libgbm-dev \
+libegl1-mesa-dev libgles2-mesa-dev
 ```
 
-Run
+Download and compile SDL2.
+```
+git clone https://github.com/libsdl-org/SDL.git -b SDL2
+cd SDL
+mkdir build
+cd build
+../configure
+make
+```
+
+Step back and rename path for compilation.
+```
+cd ~/tommy
+mv SDL/include SDL/SDL2
+```
+
+Compile game from source.
+```
+gcc tommy.c -ISDL -LSDL/build/build/.libs -lSDL2 -lm -Wl,-rpath,"." -o tommy
+```
+
+Place shared library next to executable, linked via rpath in compilation.
+```
+cp SDL/build/build/.libs/libSDL2-2.0.so.0 .
+```
+
+Run game from commandline.
 ```
 ./tommy
 ```
+
+Package for distribution.
+```
+tar czfv tommy_linux_x86_64.tar.gz tommy libSDL2-2.0.so.0
+```
+
+#### NOTE
+
+You could just install SDL2 on your system and compile against it like this:
+```
+sudo apt install  libsdl2-dev
+gcc tommy.c -o tommy `sdl2-config --cflags --libs` -lm
+```
+But the executable will then depend on it, meaning that on another or fresh system it won't work until you install SDL2.

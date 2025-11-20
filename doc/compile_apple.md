@@ -1,44 +1,44 @@
 ### Steps to compile on Apple silicon (ARM64)
 
-Create a new folder and cd into
+These instructions work for the macOS 15.6.1 default Terminal.
+
+Create a new folder and step into.
 ```
 mkdir ~/tommy
 cd ~/tommy
 ```
 
-Download game source code
+Download game source code.
 ```
 wget https://raw.githubusercontent.com/joerivandervelde/the-lost-tommy/refs/heads/main/tommy.c -O tommy.c
 ```
 
-Install clang which is part of Xcode command-line developer tools
+Install clang which is part of Xcode command-line developer tools.
 ```
 xcode-select --install
 ```
 
-Download SDL2, mount, extract framework and cleanup
+Download SDL2, mount, extract, and unmount.
 ```
 wget https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.dmg
 hdiutil attach SDL2-2.32.10.dmg
 cp -R /Volumes/SDL2/SDL2.framework .
 diskutil unmount /Volumes/SDL2
-rm SDL2-2.32.10.dmg
 ```
 
-Compile
+Compile game from source.
 ```
 clang -std=c11 -arch arm64 tommy.c -F. -framework SDL2 -Wl,-rpath,@executable_path/../Frameworks -o tommy
 ```
 
-Create app structure
+Create app structure.
 ```
 mkdir -p tommy.app/Contents/{MacOS,Frameworks,Resources}
 mv tommy tommy.app/Contents/MacOS/
 cp -R SDL2.framework tommy.app/Contents/Frameworks/
-rm -rf SDL2.framework
 ```
 
-Add plist
+Add plist file to app contents.
 ```
 echo '<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -64,24 +64,22 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
 ' >> tommy.app/Contents/Info.plist
 ```
 
-All done. Run by double click or from commandline:
+Run game by double-clicking or from commandline.
 ```
 open -n ./tommy.app  
 ```
 
-### Alternative with Homebrew SDL2 and don't wrap into an app
+Package for distribution.
+```
+tar czfv tommy_apple_silicon_ARM64.tar.gz tommy.app
+```
 
-Install SDL2
+#### NOTE
+
+You could just install SDL2 on your system, compile against it like this, and run:
 ```
 brew install sdl2
-```
-
-Compile
-```
 clang -v tommy.c -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -o tommy
-```
-
-Run
-```
 ./tommy
 ```
+But the executable will then depend on it, meaning that on another or fresh system it won't work until you install SDL2.
