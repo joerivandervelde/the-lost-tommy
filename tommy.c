@@ -922,6 +922,10 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    fprintf(stderr, "video driver: %s\n", SDL_GetCurrentVideoDriver());
+    fprintf(stderr, "display count: %d\n", SDL_GetNumVideoDisplays());
+    fprintf(stderr, "window flags: 0x%x\n", SDL_GetWindowFlags(win));
+
     reset_game();
 
     prev = SDL_GetPerformanceCounter();
