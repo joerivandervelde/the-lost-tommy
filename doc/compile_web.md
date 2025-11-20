@@ -20,6 +20,7 @@ cd emsdk
 ./emsdk install latest
 ./emsdk activate latest
 source ./emsdk_env.sh   # on Windows: emsdk_env.bat
+cd ..
 ```
 
 Compile game from source.
