@@ -16,6 +16,8 @@
  */
 #define SCREEN_W                   800
 #define SCREEN_H                   600
+#define CENTER_W            SCREEN_W/2
+#define CENTER_H            SCREEN_H/2
 #define PLAYER_SPEED            180.0f
 #define BULLET_SPEED            400.0f
 #define ENEMY_SPEED              60.0f
@@ -85,6 +87,7 @@ static float survival_time = 0.0f;
 static bool game_over = false;
 static bool game_won = false;
 static bool paused = false;
+static bool show_welcome_msg = true;
 static bool running = true;
 static float enemy_spawn_timer = 0.0f;
 static uint64_t prev = 0;
@@ -214,7 +217,11 @@ static void reset_game(void) {
     enemy_spawn_timer = 0.0f;
     game_over = false;
     game_won = false;
-    paused = false;
+    if(show_welcome_msg) {
+        paused = true;
+    } else {
+        paused = false;
+    }
 }
 
 /**
@@ -611,22 +618,32 @@ static const char *glyph_for_char(char c) {
         case '7': return "####""...#""...#""..#.""..#.""..#.";
         case '8': return "####""#..#""#..#""####""#..#""####";
         case '9': return "####""#..#""#..#""####""...#""####";
-        case 'A': return ".##.""#..#""#..#""####""#..#""#..#";
+        case 'A': return ".##.""#..#""####""#..#""#..#""#..#";
+        case 'B': return "###.""#..#""###.""#..#""#..#""###.";
         case 'C': return ".###""#...""#...""#...""#..."".###";
         case 'D': return "###.""#..#""#..#""#..#""#..#""###.";
-        case 'E': return "####""#...""#...""###.""#...""####";
-        case 'R': return "###.""#..#""#..#""###.""#.#.""#..#";
-        case 'V': return "#..#""#..#""#..#""#..#"".#.#""..#.";
-        case 'P': return "###.""#..#""#..#""###.""#...""#...";
-        case 'S': return ".###""#...""#..."".##.""...#""###.";
-        case 'T': return "####"" .#."" .#."" .#."" .#."" .#.";
-        case 'O': return ".##.""#..#""#..#""#..#""#..#"".##.";
-        case 'M': return "####""####""##.#""#..#""#..#""#..#";
-        case 'U': return "#..#""#..#""#..#""#..#""#..#"".##.";
+        case 'E': return "####""#...""###.""#...""#...""####";
+        case 'F': return "####""#...""###.""#...""#...""#...";
+        case 'G': return ".###""#...""#.##""#..#""#..#"".##.";
         case 'H': return "#..#""#..#""####""#..#""#..#""#..#";
+        case 'I': return ".###""..#.""..#.""..#.""..#.""####";
+        case 'J': return ".###""...#""...#""...#""#..#"".##.";
+        case 'K': return "#..#""#.#.""##..""#.#.""#.#.""#..#";
         case 'L': return "#...""#...""#...""#...""#...""####";
-        case 'I': return "###."".#.."".#.."".#.."".#..""###.";
+        case 'M': return ".###""####""##.#""#..#""#..#""#..#";
+        case 'N': return "###.""#..#""#..#""#..#""#..#""#..#";
+        case 'O': return ".##.""#..#""#..#""#..#""#..#"".##.";
+        case 'P': return "###.""#..#""#..#""###.""#...""#...";
+        case 'Q': return ".##.""#..#""#..#""#..#"".##.""..##";
+        case 'R': return "###.""#..#""#..#""###.""#.#.""#..#";
+        case 'S': return ".###""#..."".##.""...#""...#""###.";
+        case 'T': return "####"" .#."" .#."" .#."" .#."" .#.";
+        case 'U': return "#..#""#..#""#..#""#..#""#..#"".##.";
+        case 'V': return "#..#""#..#""#..#""#..#"".#.#""..#.";
+        case 'W': return "#..#""#..#""#..#""#.##""####""###.";
+        case 'X': return "#..#""#..#"".##."".##.""#..#""#..#";
         case 'Y': return "#..#""#..#"".#.#""..#.""..#.""..#.";
+        case 'Z': return "####""...#""..#."".#..""#...""####";
         default:  return NULL;
     }
 }
@@ -634,8 +651,7 @@ static const char *glyph_for_char(char c) {
 /**
  * Draw text
  */
-static void draw_text(SDL_Renderer *ren, int x, int y, const char *msg,
-                      SDL_Color color) {
+static void draw_text(SDL_Renderer *ren, int x, int y, const char *msg, SDL_Color color) {
     SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
     int cursor_x = x;
     for (const char *p = msg; *p; p++) {
@@ -717,6 +733,36 @@ static void draw_dots(SDL_Renderer *ren) {
 }
 
 /**
+ * get pixel width of a string, 10 px per glyph
+ */
+static int get_text_width(const char *msg) {
+    int w = 0;
+    for (const char *p = msg; *p; p++) {
+        w += 10;
+    }
+    return w;
+}
+
+/**
+ * get pixel height of a string, 6 rows * 2px per row
+ */
+static int get_text_height(void) {
+    return 6 * 2;
+}
+
+/**
+ * draw text centered around (cx, cy)
+ */
+static void draw_text_centered(SDL_Renderer *ren, int cx, int cy,
+                               const char *msg, SDL_Color color) {
+    int w = get_text_width(msg);
+    int h = get_text_height();
+    int x = cx - w / 2;
+    int y = cy - h / 2;
+    draw_text(ren, x, y, msg, color);
+}
+
+/**
  * Render graphics
  */
 static void render(SDL_Renderer *ren) {
@@ -794,18 +840,23 @@ static void render(SDL_Renderer *ren) {
     // pause
     if (paused) {
         SDL_Color pause_color = {255, 255, 255, 255};
-        draw_text(ren, SCREEN_W/2 - 40, SCREEN_H/2 - 10, "PAUSED", fontcol);
+        if(show_welcome_msg) {
+            draw_text_centered(ren, CENTER_W, CENTER_H-10, "USE WASD TO MOVE AND IJKL TO FIRE", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO START", fontcol);
+        } else {
+            draw_text_centered(ren, CENTER_W, CENTER_H-10, "GAME IS PAUSED", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO RESUME", fontcol);
+        }
     }
 
     // game over message
     if (game_over) {
         if (game_won) {
-            draw_text(ren, SCREEN_W/2 - 90, SCREEN_H/2 - 50, "YOU SURVIVED!", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-10, "YOU SURVIVED!", fontcol);
         } else {
-            draw_text(ren, SCREEN_W/2 - 50, SCREEN_H/2 - 50, "DEAD", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-10, "YOU DIED!", fontcol);
         }
-        draw_text(ren, SCREEN_W/2 - 80, SCREEN_H/2 - 20, "PRESS SPACE", fontcol);
-        draw_text(ren, SCREEN_W/2 - 75, SCREEN_H/2 + 10, "TO RESTART", fontcol);
+        draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO TRY AGAIN", fontcol);
 	}
 
     SDL_RenderPresent(ren);
@@ -829,8 +880,10 @@ static void update_game(void *arg) {
                     // when game over, SPACE restarts
                     reset_game();
                 } else {
-                    // when alive, SPACE pauses
+                    // when alive, SPACE pauses/unpauses
                     paused = !paused;
+                    // only show welcome message once
+                    if(show_welcome_msg) show_welcome_msg = false;
                 }
             }
         }
