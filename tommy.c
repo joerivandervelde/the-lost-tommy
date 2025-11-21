@@ -842,7 +842,8 @@ static void render(SDL_Renderer *ren) {
         SDL_Color pause_color = {255, 255, 255, 255};
         if(show_welcome_msg) {
             draw_text_centered(ren, CENTER_W, CENTER_H-10, "USE WASD TO MOVE AND IJKL TO FIRE", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO START", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO START AND PAUSE", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+30, "ESC TO QUIT", fontcol);
         } else {
             draw_text_centered(ren, CENTER_W, CENTER_H-10, "GAME IS PAUSED", fontcol);
             draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO RESUME", fontcol);
