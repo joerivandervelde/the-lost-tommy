@@ -27,6 +27,7 @@
 #define MAX_BACKGROUND_DOTS       5000
 #define PLAYER_SHOOT_COOLDOWN_SEC 0.4f
 #define ENEMY_FIRE_COOLDOWN_SEC   1.5f
+#define ENEMY_DEATH_TIME_SEC     0.25f
 
 /**
  * Structs
@@ -54,7 +55,7 @@ typedef struct {
     float x, y;
     float vx, vy;
     bool alive;
-    int death_timer;
+    float death_timer;
     float fire_cooldown;
 } Enemy;
 
@@ -277,7 +278,7 @@ static void enemy_try_fire(Enemy *e) {
 static void spawn_enemy(void) {
     int idx = -1;
     for (int i=0;i<MAX_ENEMIES;i++) {
-        if (!enemies[i].alive && enemies[i].death_timer==0) {
+        if (!enemies[i].alive && enemies[i].death_timer <= 0.0f) {
             idx = i; break;
         }
     }
@@ -404,8 +405,9 @@ static void move_enemies(float dt) {
                 }
             }
         } else {
-            if (e->death_timer > 0) {
-                e->death_timer--;
+            if (e->death_timer > 0.0f) {
+                e->death_timer -= dt;
+                if (e->death_timer < 0.0f) e->death_timer = 0.0f;
             }
         }
     }
@@ -480,7 +482,7 @@ static void handle_props_effects(void) {
             if (circle_hit(props[p].x, props[p].y, 10.0f, // was 14
                            en->x,       en->y,       10.0f)) { // was 12
                 en->alive = false;
-                en->death_timer = 15;
+                en->death_timer = ENEMY_DEATH_TIME_SEC;
                 break;
             }
         }
@@ -502,7 +504,7 @@ static void handle_bullet_actor_collisions(void) {
 
                 if (circle_hit(bullets[b].x, bullets[b].y, 2.0f, en->x, en->y, 12.0f)) {
                     en->alive = false;
-                    en->death_timer = 15;
+                    en->death_timer = ENEMY_DEATH_TIME_SEC;
                     bullets[b].alive = false;
                     break;
                 }
@@ -726,7 +728,7 @@ static void render(SDL_Renderer *ren) {
     // draw enemy blood
     for (int i=0;i<MAX_ENEMIES;i++) {
         Enemy *e = &enemies[i];
-        if (!e->alive && e->death_timer > 0) {
+        if (!e->alive && e->death_timer > 0.0f) {
             SDL_SetRenderDrawColor(ren, 140, 0, 0, 255);
             draw_filled_circle(ren, (int)e->x, (int)e->y, 10);
         }
