@@ -92,6 +92,7 @@ static bool running = true;
 static float enemy_spawn_timer = 0.0f;
 static uint64_t prev = 0;
 static double freq = 0;
+static SDL_Window *win = NULL;
 
 /**
  * Helper functions
@@ -843,7 +844,8 @@ static void render(SDL_Renderer *ren) {
         if(show_welcome_msg) {
             draw_text_centered(ren, CENTER_W, CENTER_H-10, "USE WASD TO MOVE AND IJKL TO FIRE", fontcol);
             draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO START AND PAUSE", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+30, "ESC TO QUIT", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+30, "F1 TO TOGGLE FULLSCREEN", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+50, "ESC TO QUIT", fontcol);
         } else {
             draw_text_centered(ren, CENTER_W, CENTER_H-10, "GAME IS PAUSED", fontcol);
             draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO RESUME", fontcol);
@@ -885,6 +887,15 @@ static void update_game(void *arg) {
                     paused = !paused;
                     // only show welcome message once
                     if(show_welcome_msg) show_welcome_msg = false;
+                }
+            }
+            else if (ev.key.keysym.sym == SDLK_F1) {
+                // toggle fullscreen / windowed
+                Uint32 flags = SDL_GetWindowFlags(win);
+                if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) {
+                    SDL_SetWindowFullscreen(win, 0);
+                } else {
+                    SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
                 }
             }
         }
@@ -955,7 +966,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    SDL_Window *win = SDL_CreateWindow(
+    win = SDL_CreateWindow(
         "The Lost Tommy - survive for one minute to win",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         SCREEN_W, SCREEN_H,
@@ -966,6 +977,8 @@ int main(int argc, char **argv) {
         SDL_Quit();
         return 1;
     }
+    //start fullscreen (alternative for true fullscreen: SDL_WINDOW_FULLSCREEN)
+    SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
     SDL_Renderer *ren = SDL_CreateRenderer(
         win, -1,
@@ -977,6 +990,8 @@ int main(int argc, char **argv) {
         SDL_Quit();
         return 1;
     }
+    SDL_RenderSetLogicalSize(ren, SCREEN_W, SCREEN_H);
+    // disable rescaling to desktop resolution: SDL_RenderSetIntegerScale(ren, SDL_TRUE);
 
     fprintf(stderr, "video driver: %s\n", SDL_GetCurrentVideoDriver());
     fprintf(stderr, "display count: %d\n", SDL_GetNumVideoDisplays());
