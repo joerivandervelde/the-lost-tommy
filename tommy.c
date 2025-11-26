@@ -30,6 +30,7 @@
 #define PLAYER_SHOOT_COOLDOWN_SEC 0.4f
 #define ENEMY_FIRE_COOLDOWN_SEC   1.5f
 #define ENEMY_DEATH_TIME_SEC     0.25f
+#define FONT_SCALE                   3
 
 /**
  * Structs
@@ -123,8 +124,7 @@ static float dist2(float ax, float ay, float bx, float by) {
     return dx*dx + dy*dy;
 }
 
-static bool circle_hit(float ax, float ay, float ar,
-                       float bx, float by, float br) {
+static bool circle_hit(float ax, float ay, float ar, float bx, float by, float br) {
     float dx = ax - bx;
     float dy = ay - by;
     float rr = ar + br;
@@ -228,8 +228,7 @@ static void reset_game(void) {
 /**
  * Spawn bullet
  */
-static void spawn_bullet(float x, float y, float dx, float dy,
-                         float speed, bool from_enemy) {
+static void spawn_bullet(float x, float y, float dx, float dy, float speed, bool from_enemy) {
     for (int i=0; i<MAX_BULLETS; i++) {
         if (!bullets[i].alive) {
             normalize(&dx,&dy);
@@ -487,8 +486,7 @@ static void handle_props_effects(void) {
             if (props[p].kind != PROP_WIRE) continue;
 
             // enemy radius ~10
-            if (circle_hit(props[p].x, props[p].y, 10.0f, // was 14
-                           en->x,       en->y,       10.0f)) { // was 12
+            if (circle_hit(props[p].x, props[p].y, 10.0f, en->x, en->y, 10.0f)) {
                 en->alive = false;
                 en->death_timer = ENEMY_DEATH_TIME_SEC;
                 break;
@@ -510,7 +508,7 @@ static void handle_bullet_actor_collisions(void) {
                 Enemy *en = &enemies[e];
                 if (!en->alive) continue;
 
-                if (circle_hit(bullets[b].x, bullets[b].y, 2.0f, en->x, en->y, 12.0f)) {
+                if (circle_hit(bullets[b].x, bullets[b].y, 2.0f, en->x, en->y, 10.0f)) {
                     en->alive = false;
                     en->death_timer = ENEMY_DEATH_TIME_SEC;
                     bullets[b].alive = false;
@@ -604,47 +602,50 @@ static void draw_soldier(SDL_Renderer *ren, int x, int y, bool player_flag) {
  */
 static const char *glyph_for_char(char c) {
     switch (c) {
-    	case ' ': return "....""....""....""....""....";
-        case '.': return "....""....""...."".##."".##.";
-        case ':': return ".##."".##.""...."".##."".##.";
-        case '-': return "....""....""####""....""....";
-        case '!': return ".##."".##."".##.""...."".##.";
-        case '0': return "####""#..#""#..#""#..#""####";
-        case '1': return "..#."".##.""..#.""..#.""####";
-        case '2': return "####""...#""####""#...""####";
-        case '3': return "####""...#"".###""...#""####";
-        case '4': return "#..#""#..#""####""...#""...#";
-        case '5': return "####""#...""####""...#""####";
-        case '6': return "####""#...""####""#..#""####";
-        case '7': return "####""...#""...#""..#.""..#.";
-        case '8': return "####""#..#""####""#..#""####";
-        case '9': return "####""#..#""####""...#""####";
-        case 'A': return ".##.""#..#""####""#..#""#..#";
-        case 'B': return "###.""#..#""###.""#..#""###.";
-        case 'C': return ".###""#...""#...""#..."".###";
-        case 'D': return "###.""#..#""#..#""#..#""###.";
-        case 'E': return "####""#...""###.""#...""####";
-        case 'F': return "####""#...""###.""#...""#...";
-        case 'G': return ".###""#...""#.##""#..#"".##.";
-        case 'H': return "#..#""#..#""####""#..#""#..#";
-        case 'I': return ".###""..#.""..#.""..#.""####";
-        case 'J': return ".###""...#""...#""#..#"".##.";
-        case 'K': return "#..#""#.#.""##..""#.#.""#..#";
-        case 'L': return "#...""#...""#...""#...""####";
-        case 'M': return ".###""####""##.#""#..#""#..#";
-        case 'N': return "###.""#..#""#..#""#..#""#..#";
-        case 'O': return ".##.""#..#""#..#""#..#"".##.";
-        case 'P': return "###.""#..#""###.""#...""#...";
-        case 'Q': return ".##.""#..#""#..#"".##.""..##";
-        case 'R': return "###.""#..#""###.""#.#.""#..#";
-        case 'S': return ".###""#..."".##.""...#""###.";
-        case 'T': return "####""..#.""..#.""..#.""..#.";
-        case 'U': return "#..#""#..#""#..#""#..#"".##.";
-        case 'V': return "#..#""#..#""#..#"".#.#""..#.";
-        case 'W': return "#..#""#..#""#.##""####""###.";
-        case 'X': return "#..#""#..#"".##.""#..#""#..#";
-        case 'Y': return "#..#""#..#"".#.#""..#.""..#.";
-        case 'Z': return "####""...#"".##.""#...""####";
+    	case ' ': return ".....""....."".....""....."".....";
+        case '.': return "....."".....""....."".##.."".##..";
+        case ',': return "....."".....""....."".##..""..#..";
+        case ':': return ".##.."".##..""....."".##.."".##..";
+        case '-': return "....."".....""#####""....."".....";
+        case '!': return "#####"".###."".###.""....."".###.";
+        case '/': return "....#""...#.""..#.."".#...""#....";
+        case '#': return "#####""#####""#####""#####""#####";
+        case '0': return ".###.""#..##""#.#.#""##..#"".###.";
+        case '1': return "..#..""###..""..#..""..#..""#####";
+        case '2': return "####.""....#"".###.""#....""#####";
+        case '3': return "####.""....#"".###.""....#""####.";
+        case '4': return "#..#.""#..#.""#####""...#.""...#.";
+        case '5': return "#####""#....""####.""....#""####.";
+        case '6': return ".###.""#....""####.""#...#"".###.";
+        case '7': return "#####""....#""...#.""..#..""..#..";
+        case '8': return ".###.""#...#"".###.""#...#"".###.";
+        case '9': return ".###.""#...#"".####""....#"".###.";
+        case 'A': return ".###.""#...#""#####""#...#""#...#";
+        case 'B': return "####.""#...#""####.""#...#""####.";
+        case 'C': return ".####""#....""#....""#...."".####";
+        case 'D': return "####.""#...#""#...#""#...#""####.";
+        case 'E': return "#####""#....""####.""#....""#####";
+        case 'F': return "#####""#....""####.""#....""#....";
+        case 'G': return ".####""#....""#..##""#...#"".####";
+        case 'H': return "#...#""#...#""#####""#...#""#...#";
+        case 'I': return "#####""..#..""..#..""..#..""#####";
+        case 'J': return ".####""...#.""...#.""#..#."".##..";
+        case 'K': return "#...#""#..#.""###..""#..#.""#...#";
+        case 'L': return "#....""#....""#....""#....""#####";
+        case 'M': return "#...#""##.##""#.#.#""#.#.#""#...#";
+        case 'N': return "#...#""##..#""#.#.#""#..##""#...#";
+        case 'O': return ".###.""#...#""#...#""#...#"".###.";
+        case 'P': return "####.""#...#""####.""#....""#....";
+        case 'Q': return ".###.""#...#""#...#""#..#."".##.#";
+        case 'R': return "####.""#...#""####.""#..#.""#...#";
+        case 'S': return ".####""#...."".###.""....#""####.";
+        case 'T': return "#####""..#..""..#..""..#..""..#..";
+        case 'U': return "#...#""#...#""#...#""#...#"".###.";
+        case 'V': return "#...#""#...#"".#.#."".#.#.""..#..";
+        case 'W': return "#...#""#.#.#""#.#.#""#.#.#"".#.#.";
+        case 'X': return "#...#"".#.#.""..#.."".#.#.""#...#";
+        case 'Y': return "#...#""#...#"".#.#.""..#..""..#..";
+        case 'Z': return "#####""...#.""..#.."".#...""#####";
         default:  return NULL;
     }
 }
@@ -657,19 +658,15 @@ static void draw_text(SDL_Renderer *ren, int x, int y, const char *msg, SDL_Colo
     int cursor_x = x;
     for (const char *p = msg; *p; p++) {
         const char *g = glyph_for_char(*p);
-        if (!g) {
-            cursor_x += 10;
-            continue;
-        }
-        for (int gy=0; gy<5; gy++) {
-            for (int gx=0; gx<4; gx++) {
-                char pixel = g[gy*4 + gx];
+        for (int gy=0; gy<5; gy++) { // font is 5 high
+            for (int gx=0; gx<5; gx++) { // and 5 wide
+                char pixel = g[gy*5 + gx];
                 if (pixel == '#') {
-                    draw_rect_scaled(ren, cursor_x + gx*2, y + gy*2, 2);
+                    draw_rect_scaled(ren, cursor_x + gx*FONT_SCALE, y + gy*FONT_SCALE, FONT_SCALE);
                 }
             }
         }
-        cursor_x += 10;
+        cursor_x += 6*FONT_SCALE; // using 5 wide leaves a gap of 1 pixel
     }
 }
 
@@ -734,12 +731,12 @@ static void draw_dots(SDL_Renderer *ren) {
 }
 
 /**
- * get pixel width of a string, 10 px per glyph
+ * get pixel width of a string
  */
 static int get_text_width(const char *msg) {
     int w = 0;
     for (const char *p = msg; *p; p++) {
-        w += 10;
+        w += 6*FONT_SCALE; // 5 wide + 1 pixel gap
     }
     return w;
 }
@@ -747,10 +744,9 @@ static int get_text_width(const char *msg) {
 /**
  * draw text centered around (cx, cy)
  */
-static void draw_text_centered(SDL_Renderer *ren, int cx, int cy,
-                               const char *msg, SDL_Color color) {
+static void draw_text_centered(SDL_Renderer *ren, int cx, int cy, const char *msg, SDL_Color color) {
     int w = get_text_width(msg);
-    int h = 10; // 5 rows * 2px per row
+    int h = 5*FONT_SCALE; // glyphs are 5 high, line gap is up to cy
     int x = cx - w / 2;
     int y = cy - h / 2;
     draw_text(ren, x, y, msg, color);
@@ -835,24 +831,28 @@ static void render(SDL_Renderer *ren) {
     if (paused) {
         SDL_Color pause_color = {255, 255, 255, 255};
         if(show_welcome_msg) {
-            draw_text_centered(ren, CENTER_W, CENTER_H-10, "USE WASD TO MOVE AND IJKL TO FIRE", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO START AND PAUSE", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+30, "F1 TO TOGGLE FULLSCREEN", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+50, "ESC TO QUIT", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-210, "##################", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-180, "# THE LOST TOMMY #", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-150, "##################", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-90, "GAME CONTROLS:", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-30, "WASD: MOVE, IJKL: FIRE", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+30, "SPACEBAR: START/PAUSE", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+90, "F1: TOGGLE FULLSCREEN", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+150, "ESC: QUIT", fontcol);
         } else {
-            draw_text_centered(ren, CENTER_W, CENTER_H-10, "GAME IS PAUSED", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO RESUME", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-30, "GAME IS PAUSED", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+30, "PRESS SPACEBAR TO RESUME", fontcol);
         }
     }
 
     // game over message
     if (game_over) {
         if (game_won) {
-            draw_text_centered(ren, CENTER_W, CENTER_H-10, "YOU SURVIVED!", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-30, "YOU SURVIVED!", fontcol);
         } else {
-            draw_text_centered(ren, CENTER_W, CENTER_H-10, "YOU DIED!", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-30, "YOU DIED!", fontcol);
         }
-        draw_text_centered(ren, CENTER_W, CENTER_H+10, "PRESS SPACE TO TRY AGAIN", fontcol);
+        draw_text_centered(ren, CENTER_W, CENTER_H+30, "PRESS SPACEBAR TO PLAY AGAIN", fontcol);
 	}
 
     SDL_RenderPresent(ren);
@@ -961,10 +961,7 @@ int main(int argc, char **argv) {
 
     win = SDL_CreateWindow(
         "The Lost Tommy - survive for one minute to win",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        SCREEN_W, SCREEN_H,
-        SDL_WINDOW_SHOWN
-    );
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_W, SCREEN_H, SDL_WINDOW_SHOWN);
     if (!win) {
         SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
         SDL_Quit();
@@ -995,8 +992,6 @@ int main(int argc, char **argv) {
     prev = SDL_GetPerformanceCounter();
     freq = (double)SDL_GetPerformanceFrequency();
 
-
-
     #ifdef __EMSCRIPTEN__
         emscripten_set_main_loop_arg(update_game, ren, 0, 1);
     #else
@@ -1004,7 +999,6 @@ int main(int argc, char **argv) {
             update_game(ren);
         }
     #endif
-
 
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
