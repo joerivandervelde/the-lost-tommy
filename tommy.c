@@ -969,8 +969,10 @@ int main(int argc, char **argv) {
         SDL_Quit();
         return 1;
     }
-    //start fullscreen (alternative for true fullscreen: SDL_WINDOW_FULLSCREEN)
-    SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    //start fullscreen when not in browser (alternative for true fullscreen: SDL_WINDOW_FULLSCREEN)
+    #ifndef __EMSCRIPTEN__
+        SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    #endif
 
     SDL_Renderer *ren = SDL_CreateRenderer(
         win, -1,
