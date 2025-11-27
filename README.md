@@ -22,13 +22,17 @@ Your many enemies are ruthless and have even deployed barbed wire.
 To stand a chance, you must rely on your trusty rifle, your swiftness, but most of all, your wits.
 
 ### How to play
-* Download [latest release](https://github.com/joerivandervelde/the-lost-tommy/releases) for your operating system.
-* Extract contents and run `tommy`.
+* Online
+    * Open in your [browser](http://joerivandervelde.github.io/the-lost-tommy)
+* Offline
+  * Download for [Windows](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_windows_x86_64.zip), [Linux](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_linux_x86_64.tar.gz), or [Apple](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_apple_silicon_ARM64.tar.gz)
+  * Extract and run `tommy`
 
 ### Game controls
  * Movement (in 8 directions): `W` `A` `S` `D`
  * Fire (in 8 directions): `I` `J` `K` `L`
- * Pause/restart: `SPACEBAR`
+ * Start or pause game: `SPACEBAR`
+ * Toggle fullscreen mode: `F1`
  * Quit: `ESC`
 
 ### The battlefield
