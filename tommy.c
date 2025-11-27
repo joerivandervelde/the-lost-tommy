@@ -609,6 +609,8 @@ static const char *glyph_for_char(char c) {
         case '-': return "....."".....""#####""....."".....";
         case '!': return "#####"".###."".###.""....."".###.";
         case '/': return "....#""...#.""..#.."".#...""#....";
+        case '[': return "#####""##...""##...""##...""#####";
+        case ']': return "#####""...##""...##""...##""#####";
         case '#': return "#####""#####""#####""#####""#####";
         case '0': return ".###.""#..##""#.#.#""##..#"".###.";
         case '1': return "..#..""###..""..#..""..#..""#####";
@@ -834,11 +836,11 @@ static void render(SDL_Renderer *ren) {
             draw_text_centered(ren, CENTER_W, CENTER_H-210, "##################", fontcol);
             draw_text_centered(ren, CENTER_W, CENTER_H-180, "# THE LOST TOMMY #", fontcol);
             draw_text_centered(ren, CENTER_W, CENTER_H-150, "##################", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H-90, "GAME CONTROLS:", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H-30, "WASD: MOVE, IJKL: FIRE", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+30, "SPACEBAR: START/PAUSE", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+90, "F1: TOGGLE FULLSCREEN", fontcol);
-            draw_text_centered(ren, CENTER_W, CENTER_H+150, "ESC: QUIT", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H-30, "MOVE: W A S D", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+30, "FIRE: I J K L", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+90, "START/PAUSE: SPACEBAR", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+150, "TOGGLE FULLSCREEN: F1", fontcol);
+            draw_text_centered(ren, CENTER_W, CENTER_H+210, "QUIT: ESC", fontcol);
         } else {
             draw_text_centered(ren, CENTER_W, CENTER_H-30, "GAME IS PAUSED", fontcol);
             draw_text_centered(ren, CENTER_W, CENTER_H+30, "PRESS SPACEBAR TO RESUME", fontcol);
