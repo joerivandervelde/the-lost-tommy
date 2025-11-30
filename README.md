@@ -23,10 +23,12 @@ To stand a chance, you must rely on your trusty rifle, your swiftness, but most 
 
 ### How to play
 * Online
-    * Open in your [browser](http://joerivandervelde.github.io/the-lost-tommy)
+    * Open in your [browser](http://joerivandervelde.github.io/the-lost-tommy) and enjoy.
+    * Note: to reset game and viewport, refresh your browser window.
 * Offline
-  * Download for [Windows](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_windows_x86_64.zip), [Linux](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_linux_x86_64.tar.gz), or [Apple](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_apple_silicon_ARM64.tar.gz)
-  * Extract and run `tommy`
+  * Download for [Windows](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_windows_x86_64.zip), [Linux](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_linux_x86_64.tar.gz), or [Apple](https://github.com/joerivandervelde/the-lost-tommy/releases/download/v1.0.0/tommy_apple_silicon_ARM64.tar.gz).
+  * Extract and run `tommy`.
+  * Note: for troubleshooting, see [release page](https://github.com/joerivandervelde/the-lost-tommy/releases/tag/v1.0.0).
 
 ### Game controls
  * Movement (in 8 directions): `W` `A` `S` `D`
